@@ -1,21 +1,30 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
 
+# Model Configuration
 model_name = "Qwen/Qwen2-1.5B-Instruct"
 
-print(f"🔹 Loading {model_name} (optimized for CPU)...")
+print(f"🔹 [LLM] Loading model: {model_name}...")
 
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForCausalLM.from_pretrained(model_name)
+# Load Tokenizer & Model
+try:
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForCausalLM.from_pretrained(model_name)
+except Exception as e:
+    print(f"Error loading model: {e}")
+    exit()
 
+# Set device to CPU
 device = torch.device("cpu")
 model = model.to(device)
 
 def generate_response(prompt, max_new_tokens=100):
+    """Function to generate text from the LLM"""
     messages = [
-        {"role": "system", "content": "You are a helpful movie recommendation assistant."},
+        {"role": "system", "content": "You are a helpful, friendly movie assistant. Keep answers short and concise."},
         {"role": "user", "content": prompt}
     ]
+    
     formatted_input = tokenizer.apply_chat_template(
         messages,
         tokenize=False,
@@ -41,6 +50,4 @@ def generate_response(prompt, max_new_tokens=100):
     return response.strip()
 
 if __name__ == "__main__":
-    test_q = "Try to recommend me a good sci-fi movie from 2020."
-    print(f"\nTest Input: {test_q}")
-    print(f"Output: {generate_response(test_q)}")
+    print(generate_response("Hello!"))
